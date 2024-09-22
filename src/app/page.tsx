@@ -22,16 +22,20 @@ interface ParsedDataRow {
 }
 
 export default function Home() {
-  const [file, setFile] = useState<File>();
+  const [file, setFile] = useState<File[]>();
   const [badData, setBadData] = useState<ParsedDataRow[]>();
   const [collections, setCollections] = useState<ParsedDataRow[]>();
   const [goodData, setGoodData] = useState<ParsedDataRow[]>();
 
   const HandleChange = (e: ChangeEvent<HTMLInputElement>) => {
     let filesUploaded = e.target.files;
-
+    let fileArray: File[] = [];
     if (filesUploaded) {
-      setFile(filesUploaded[0]);
+      Array.from(filesUploaded).forEach((f) => {
+        fileArray.push(f);
+      });
+
+      setFile(fileArray);
       console.log("Submit");
     }
   };
@@ -90,27 +94,29 @@ export default function Home() {
       }
     });
 
-    setBadData(badDataTemp);
-    setCollections(collectionAccounts);
-    setGoodData(validData);
+    setBadData((prevData = []) => [...prevData, ...badDataTemp]);
+    setCollections((prevData = []) => [...prevData, ...collectionAccounts]);
+    setGoodData((prevData = []) => [...prevData, ...validData]);
   };
 
   const HandleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (file) {
-      const reader = new FileReader();
+      for (let i = 0; i < file.length; i++) {
+        const reader = new FileReader();
 
-      // Start reading the file as text
-      reader.readAsText(file);
+        // Start reading the file as text
+        reader.readAsText(file[i]);
 
-      // Event listener that triggers after the file is read
-      reader.onload = (event: ProgressEvent<FileReader>) => {
-        const content = event.target?.result as string; // File content as string
+        // Event listener that triggers after the file is read
+        reader.onload = (event: ProgressEvent<FileReader>) => {
+          const content = event.target?.result as string; // File content as string
 
-        // Parse the text here
-        processData(content);
-      };
+          // Parse the text here
+          processData(content);
+        };
+      }
     }
 
     console.log("Form Submitted");
@@ -126,7 +132,7 @@ export default function Home() {
             className="flex flex-col justify-center items-center space-y-5"
           >
             <div className=" desktop2k:pl-72 desktop1080:pl-72 laptop:pl-72 tablet:pl-52 pt-5">
-              <input type="file" onChange={HandleChange} required />
+              <input type="file" onChange={HandleChange} multiple required />
             </div>
             <div>
               <button
