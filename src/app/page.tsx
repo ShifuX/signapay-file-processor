@@ -1,5 +1,5 @@
 "use client";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useRef, useState } from "react";
 
 interface ParsedData {
   data: {
@@ -26,6 +26,7 @@ export default function Home() {
   const [badData, setBadData] = useState<ParsedDataRow[]>();
   const [collections, setCollections] = useState<ParsedDataRow[]>();
   const [goodData, setGoodData] = useState<ParsedDataRow[]>();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const HandleChange = (e: ChangeEvent<HTMLInputElement>) => {
     let filesUploaded = e.target.files;
@@ -122,6 +123,14 @@ export default function Home() {
     console.log("Form Submitted");
   };
 
+  const HandleReset = () => {
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    setBadData([]);
+    setCollections([]);
+    setGoodData([]);
+  };
+
   return (
     <div className="">
       <div className="flex justify-center items-center pt-10">
@@ -132,14 +141,26 @@ export default function Home() {
             className="flex flex-col justify-center items-center space-y-5"
           >
             <div className=" desktop2k:pl-72 desktop1080:pl-72 laptop:pl-72 tablet:pl-52 pt-5">
-              <input type="file" onChange={HandleChange} multiple required />
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={HandleChange}
+                multiple
+                required
+              />
             </div>
-            <div>
+            <div className="flex flex-row gap-x-20">
               <button
                 type="submit"
                 className="bg-blue-400 rounded-md w-20 h-10 text-center text-white hover:bg-blue-300"
               >
                 Submit
+              </button>
+              <button
+                className="bg-red-400 rounded-md w-20 h-10 text-center text-white hover:bg-red-300"
+                onClick={HandleReset}
+              >
+                Reset
               </button>
             </div>
           </form>
